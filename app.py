@@ -11,8 +11,6 @@ from secret import SPOTIFY_ID, SPOTIFY_TOKEN
 # 4. create a new playlist and add the new songs
 
 
-# todo: fix empty playlist bug
-
 class SpotifyTasks:
 
     def __init__(self):
@@ -33,17 +31,15 @@ class SpotifyTasks:
         )
         chosen_artist = "!"
         similar_artists = response.json()
+
         for artist in similar_artists["artists"]:
             if artist["id"] not in self.artists_list:
                 self.artists_list.append(artist["id"])
                 chosen_artist = artist["id"]
                 break
 
-        print(song["track"]["album"]["artists"][0]["name"])
         if chosen_artist == "!":
-            print("aici")
-            print(song["track"]["album"]["artists"][0]["name"])
-            return
+            return None
 
         end_point = "https://api.spotify.com/v1/artists/{id}/top-tracks?market={market}".format(id=chosen_artist,
                                                                                                 market="RO")
@@ -58,6 +54,7 @@ class SpotifyTasks:
         return songs["tracks"][0]["uri"]
 
     def create_playlist(self, name, songs):
+
         end_point = "https://api.spotify.com/v1/users/{user_id}/playlists".format(user_id=self.user_id)
         request_query = json.dumps({
             "name": name,
@@ -107,8 +104,11 @@ class SpotifyTasks:
         songs_list = []
         songs = response.json()
         # send every song to be analyzed
+
         for i in songs["items"]:
-            songs_list.append(self.similar_songs(i))
+            add_song = self.similar_songs(i)
+            if add_song is not None:
+                songs_list.append(add_song)
 
         self.create_playlist(new_playlist, songs_list)
 
