@@ -46,7 +46,7 @@ class SpotifyTasks:
         )
         songs = response.json()
         # returns the id of a new song to be added in the playlist
-        return songs["tracks"][0]["id"]
+        return songs["tracks"][0]["uri"]
 
     def create_playlist(self, name, songs):
         end_point = "https://api.spotify.com/v1/users/{user_id}/playlists".format(user_id=self.user_id)
@@ -64,8 +64,30 @@ class SpotifyTasks:
                 "Authorization": "Bearer {}".format(self.user_token)
             }
         )
-
         new_playlist = response.json()
+        new_playlist = new_playlist["id"]
+        print(new_playlist)
+
+
+        # created new playlist, now add the songs to it
+        end_point = "https://api.spotify.com/v1/playlists/{playlist_id}/tracks".format(playlist_id=new_playlist)
+        # print(songs)
+
+        request_query = json.dumps({
+            "uris": songs
+        })
+
+        response = requests.post(
+            end_point,
+            data=request_query,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {}".format(self.user_token)
+            }
+        )
+        print(response)
+        response = response.json()
+        print(response)
 
     def analyze_playlist(self, playlist):
         new_playlist = 'Based on ' + playlist["name"]
